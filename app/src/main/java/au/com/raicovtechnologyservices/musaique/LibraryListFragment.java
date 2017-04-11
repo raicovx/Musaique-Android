@@ -77,6 +77,8 @@ public class LibraryListFragment extends Fragment {
             if(!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permission)){
                 requestPermissions(new String[]{permission}, EXTERNAL_STORAGE_REQUEST_CODE);
             }
+        }else{
+            runMusicQuery();
         }
     }
 
