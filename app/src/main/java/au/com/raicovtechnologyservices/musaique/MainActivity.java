@@ -1,28 +1,24 @@
 package au.com.raicovtechnologyservices.musaique;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.os.Environment;
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.io.File;
-import java.util.List;
-
-import static java.util.Objects.isNull;
+import static java.security.AccessController.getContext;
 
 public class MainActivity extends AppCompatActivity {
-
+    public static final int EXTERNAL_STORAGE_REQUEST_CODE = 433;
     private String[] menuItems;
     private DrawerLayout navigationDrawer;
     private ListView navigationList;
@@ -33,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            createPermissions();
+        }
 
         //Declarations
             //Navigation
@@ -67,6 +66,16 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+    @TargetApi(23)
+    private void createPermissions() {
+        String permission = Manifest.permission.READ_EXTERNAL_STORAGE;
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), permission) != PackageManager.PERMISSION_GRANTED){
+            if(!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)){
+                requestPermissions(new String[]{permission}, EXTERNAL_STORAGE_REQUEST_CODE);
+            }
+        }
+    }
+
     private void selectItem(int position){
         Fragment fragment;
         switch(position) {
