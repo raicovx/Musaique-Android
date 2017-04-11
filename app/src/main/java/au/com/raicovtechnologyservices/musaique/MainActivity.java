@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -47,12 +48,17 @@ public class MainActivity extends AppCompatActivity {
         //Create Instance of Fragments
             LibraryListFragment libraryListFragment = new LibraryListFragment();
 
-        //Load initial Fragment
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .add(R.id.root_layout, libraryListFragment)
-                    .commit();
 
+        //Load initial Fragment
+            if (savedInstanceState == null) {
+
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .add(R.id.content_fragment, libraryListFragment, "Library")
+                        .commit();
+
+
+            }
 
         //Create List View Adapter
         navigationList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuItems));
@@ -75,14 +81,12 @@ public class MainActivity extends AppCompatActivity {
             mDrawerToggle = new ActionBarDrawerToggle(this, navigationDrawer, toolbar, R.string.open_drawer, R.string.close_drawer){
                 public void onDrawerClosed(View view)
                 {
-                    supportInvalidateOptionsMenu();
-                    //drawerOpened = false;
+                    navigationDrawer.closeDrawer(Gravity.LEFT);
                 }
 
                 public void onDrawerOpened(View drawerView)
                 {
-                    supportInvalidateOptionsMenu();
-                    //drawerOpened = true;
+                    navigationDrawer.openDrawer(Gravity.LEFT);
                 }
             };
             mDrawerToggle.setDrawerIndicatorEnabled(true);
@@ -105,23 +109,26 @@ public class MainActivity extends AppCompatActivity {
 
     private void selectItem(int position){
         Fragment fragment;
+        String tag;
         switch(position) {
             case 0:
                 fragment = new LibraryListFragment();
-
+                tag = "Library";
                 break;
             case 1:
                 fragment = new PlaylistListFragment();
+                tag = "Playlists";
                 break;
 
             default:
                 fragment = new LibraryListFragment();
+                tag = "Library";
                 break;
         }
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.root_layout, fragment)
+                .replace(R.id.content_fragment, fragment, tag)
                 .commit();
 
         navigationList.setItemChecked(position, true);

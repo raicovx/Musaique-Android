@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.File;
@@ -58,6 +59,8 @@ public class LibraryListFragment extends Fragment {
         mLibraryList.setLayoutManager(mLibraryLayoutManager);
         songs = new ArrayList<Song>();
         getSongData();
+
+
         return rootView;
 
     }
