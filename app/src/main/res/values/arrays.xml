@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="menu_items">
+        <item>Library</item>
+        <item>Playlists</item>
+        <item>Artists</item>
+        <item>Albums</item>
+        <item>All Songs</item>
+        <item>Settings</item>
+    </string-array>
+</resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="64sp"
+    android:paddingTop="8sp"
+    android:paddingLeft="8sp">
+        <ImageView
+            android:id="@+id/album_art_iv"
+            android:layout_width="48sp"
+            android:layout_height="48sp"
+            />
+        <LinearLayout
+            android:id="@+id/song_info_container"
+            android:layout_width="144sp"
+            android:layout_height="48sp"
+            android:orientation="vertical"
+            android:paddingLeft="16sp">
+
+            <TextView
+                android:id="@+id/list_song_title"
+                android:layout_width="match_parent"
+                android:layout_height="16sp"
+                android:text="All Your Fault"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/list_artist_name"
+                android:layout_width="match_parent"
+                android:layout_height="16sp"
+                android:text="Hopsin"
+                android:textSize="12sp" />
+            <TextView
+                android:id="@+id/list_album_name"
+                android:layout_width="match_parent"
+                android:layout_height="16sp"
+                android:text="All Your Fault(Single)"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+</LinearLayout>
