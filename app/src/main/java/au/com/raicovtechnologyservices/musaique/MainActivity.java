@@ -3,13 +3,18 @@ package au.com.raicovtechnologyservices.musaique;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private String[] menuItems;
     private DrawerLayout navigationDrawer;
     private ListView navigationList;
-
+    private ActionBarDrawerToggle mDrawerToggle;
 
 
     @Override
@@ -62,6 +67,28 @@ public class MainActivity extends AppCompatActivity {
         });
         setTitle(menuItems[navigationList.getSelectedItemPosition()]);
 
+        Toolbar toolbar = (Toolbar)findViewById(R.id.tool_bar);
+        setSupportActionBar(toolbar);
+        final ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            mDrawerToggle = new ActionBarDrawerToggle(this, navigationDrawer, toolbar, R.string.open_drawer, R.string.close_drawer){
+                public void onDrawerClosed(View view)
+                {
+                    supportInvalidateOptionsMenu();
+                    //drawerOpened = false;
+                }
+
+                public void onDrawerOpened(View drawerView)
+                {
+                    supportInvalidateOptionsMenu();
+                    //drawerOpened = true;
+                }
+            };
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
+            navigationDrawer.addDrawerListener(mDrawerToggle);
+            mDrawerToggle.syncState();
+        }
 
 
 
@@ -103,5 +130,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState)
+    {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
 }
