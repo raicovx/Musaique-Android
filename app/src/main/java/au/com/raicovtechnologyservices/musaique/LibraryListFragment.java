@@ -5,31 +5,21 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static au.com.raicovtechnologyservices.musaique.MainActivity.EXTERNAL_STORAGE_REQUEST_CODE;
@@ -38,13 +28,13 @@ import static au.com.raicovtechnologyservices.musaique.MainActivity.EXTERNAL_STO
  * Created by Jamie on 10/04/2017.
  */
 
-public class LibraryListFragment extends Fragment {
+public class LibraryListFragment extends Fragment implements RecyclerViewClickListener {
 
     private ArrayList<Song> songs;
     private RecyclerView mLibraryList;
     private RecyclerView.LayoutManager mLibraryLayoutManager;
 
-    public MediaPlayer mediaPlayer;
+    public CustomPlayer mediaPlayer;
     private File musicDirectory;
 
 
@@ -58,32 +48,17 @@ public class LibraryListFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.library_list_fragment, container, false);
 
+        //declare song array and populate array
+        songs = new ArrayList<Song>();
+        getSongData();
+
+        //instantiate media player
+        mediaPlayer = new CustomPlayer();
+
         //Library List Stuff
         mLibraryList = (RecyclerView) rootView.findViewById(R.id.library_list_view);
         mLibraryLayoutManager = new LinearLayoutManager(getActivity());
         mLibraryList.setLayoutManager(mLibraryLayoutManager);
-        mLibraryList.addOnItemTouchListener(new RecyclerItemClickListener(
-                getContext(), new RecyclerItemClickListener.onItemClickListener(){
-                    @Override
-                    public void onItemClick(View v, int position){
-                      try {
-                          mediaPlayer.setDataSource(songs.get(position).getSongPath());
-                          mediaPlayer.prepare();
-                          mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                              @Override
-                              public void onPrepared(MediaPlayer mp) {
-                                  mediaPlayer.start();
-                              }
-                          });
-                      }catch(IOException e){
-                        e.printStackTrace();
-                      }
-                    }
-                }));
-        songs = new ArrayList<Song>();
-        getSongData();
-
-        mediaPlayer = new MediaPlayer();
         return rootView;
 
     }
@@ -135,7 +110,12 @@ public class LibraryListFragment extends Fragment {
                 songs.add(new Song(id, title, artist, album, albumId, duration, songPath, getContext(), songs.size()));
 
             } while (musicCursor.moveToNext());
-            mLibraryList.setAdapter(new LibraryListAdapter(songs));
+            mLibraryList.setAdapter(new LibraryListAdapter(songs, this));
         }
+    }
+
+    @Override
+    public void recyclerViewListClicked(View v, int position) {
+        mediaPlayer.playSong(songs.get(position).getSongPath());
     }
 }

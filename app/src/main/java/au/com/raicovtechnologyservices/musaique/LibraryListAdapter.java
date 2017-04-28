@@ -19,9 +19,9 @@ import java.util.ArrayList;
 public class LibraryListAdapter extends RecyclerView.Adapter<LibraryListAdapter.ViewHolder>{
 
     private ArrayList<Song> songData;
+    public static RecyclerViewClickListener listener;
 
-
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView mSongTitle;
         public TextView mArtistName;
         public TextView mAlbumTitle;
@@ -35,14 +35,21 @@ public class LibraryListAdapter extends RecyclerView.Adapter<LibraryListAdapter.
             mArtistName = (TextView) v.findViewById(R.id.list_artist_name);
             mAlbumTitle = (TextView) v.findViewById(R.id.list_album_name);
             mAlbumArt = (ImageView) v.findViewById(R.id.album_art_iv);
+            v.setOnClickListener(this);
 
 
+        }
+
+        @Override
+        public void onClick(View v) {
+            listener.recyclerViewListClicked(v, this.getLayoutPosition());
         }
     }
 
 
-    public LibraryListAdapter(ArrayList<Song> songData){
+    public LibraryListAdapter(ArrayList<Song> songData, RecyclerViewClickListener listener){
         this.songData = songData;
+        this.listener = listener;
     }
 
     @Override
