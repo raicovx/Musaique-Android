@@ -1,5 +1,7 @@
 package au.com.raicovtechnologyservices.musaique;
 
+import android.media.MediaPlayer;
+
 import java.io.IOException;
 
 /**
@@ -25,10 +27,18 @@ public class CustomPlayer extends android.media.MediaPlayer {
                     mediaPlayer.start();
                 }
             });
+            mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mediaPlayer.reset();
+                }
+            });
         }catch(IOException e){
             e.printStackTrace();
             return false;
         }
+
+
         return true;
     }
 }

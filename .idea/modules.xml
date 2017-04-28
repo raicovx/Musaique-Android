@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Musaique.iml" filepath="$PROJECT_DIR$/Musaique.iml" />
-      <module fileurl="file://C:\Users\Jamie\AndroidStudioProjects\Musaique\Musaique-Android.iml" filepath="C:\Users\Jamie\AndroidStudioProjects\Musaique\Musaique-Android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Musaique-Android.iml" filepath="$PROJECT_DIR$/Musaique-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

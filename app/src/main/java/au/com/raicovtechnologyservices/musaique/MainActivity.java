@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
     private ListView navigationList;
     private ActionBarDrawerToggle mDrawerToggle;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
                         .beginTransaction()
                         .add(R.id.content_fragment, libraryListFragment, "Library")
                         .commit();
-
-
             }
 
         //Create List View Adapter

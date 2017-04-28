@@ -48,9 +48,9 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
 
         View rootView = inflater.inflate(R.layout.library_list_fragment, container, false);
 
-        //declare song array and populate array
+        //declare song array
         songs = new ArrayList<Song>();
-        getSongData();
+
 
         //instantiate media player
         mediaPlayer = new CustomPlayer();
@@ -59,6 +59,9 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
         mLibraryList = (RecyclerView) rootView.findViewById(R.id.library_list_view);
         mLibraryLayoutManager = new LinearLayoutManager(getActivity());
         mLibraryList.setLayoutManager(mLibraryLayoutManager);
+
+        //populate list
+        getSongData();
         return rootView;
 
     }
@@ -86,9 +89,10 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
     private void runMusicQuery(){
         ContentResolver musicResolver = getContext().getContentResolver();
         Uri musicUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-        Cursor musicCursor = musicResolver.query(musicUri,null,null,null, null);
-
-        if(musicCursor != null && musicCursor.moveToFirst()) {
+        String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
+        Cursor musicCursor = musicResolver.query(musicUri,null,selection,null, null);
+        musicCursor.moveToFirst();
+        if(musicCursor != null) {
             //get Columns
             int titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID);
@@ -96,7 +100,7 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
             int albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM);
             int albumArtColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID);
             int durationColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION);
-            String songPath = musicCursor.getString(musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            int songPathColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
 
 
             //add songs to list
@@ -107,6 +111,7 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
                 String album = musicCursor.getString(albumColumn);
                 long albumId = musicCursor.getLong(albumArtColumn);
                 String duration = musicCursor.getString(durationColumn);
+                String songPath =  musicCursor.getString(songPathColumn);
                 songs.add(new Song(id, title, artist, album, albumId, duration, songPath, getContext(), songs.size()));
 
             } while (musicCursor.moveToNext());
@@ -117,5 +122,6 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
     @Override
     public void recyclerViewListClicked(View v, int position) {
         mediaPlayer.playSong(songs.get(position).getSongPath());
+
     }
 }

@@ -4,4 +4,5 @@
     <color name="colorPrimaryDark">#b71c1c</color>
     <color name="colorAccent">#fdfdfd</color>
     <color name="drawerBackgroundColor">#333333</color>
+    <color name="cardBackground">#eeeeee</color>
 </resources>
