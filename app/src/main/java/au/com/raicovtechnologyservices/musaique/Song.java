@@ -20,11 +20,16 @@ public class Song {
     private String artistName;
     private String albumName;
     private String duration;
+    private String songPath;
     private long id;
     private long albumId;
     private Context context;
 
-    public Song(long id, String trackTitle, String artistName, String albumName, long albumId, String duration, Context context){
+
+
+    private int position;
+
+    public Song(long id, String trackTitle, String artistName, String albumName, long albumId, String duration, String songPath, Context context, int position){
         this.id = id;
         this.trackTitle = trackTitle;
         this.artistName = artistName;
@@ -32,6 +37,8 @@ public class Song {
         this.albumId = albumId;
         this.duration = duration;
         this.context = context;
+        this.songPath = songPath;
+        this.position = position;
         getAlbumArt();
     }
 
@@ -42,6 +49,8 @@ public class Song {
     public String getArtistName() {
         return artistName;
     }
+
+    public String getSongPath() { return songPath; }
 
     public String getAlbumName() {
         return albumName;
@@ -74,4 +83,7 @@ public class Song {
         return bm;
     }
 
+    public int getPosition() {
+        return position;
+    }
 }
