@@ -40,7 +40,7 @@ public class CustomPlayer extends android.media.MediaPlayer {
             mediaPlayer.setOnErrorListener(new OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
-                    Toast.makeText(mContext, "Media player entered Error state",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Media player entered Error state ",Toast.LENGTH_SHORT).show();
                     mediaPlayer.reset();
                     return false;
                 }
