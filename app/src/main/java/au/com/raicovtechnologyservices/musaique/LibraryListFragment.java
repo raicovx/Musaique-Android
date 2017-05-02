@@ -53,7 +53,7 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
 
 
         //instantiate media player
-        mediaPlayer = new CustomPlayer();
+        mediaPlayer = new CustomPlayer(getContext());
 
         //Library List Stuff
         mLibraryList = (RecyclerView) rootView.findViewById(R.id.library_list_view);

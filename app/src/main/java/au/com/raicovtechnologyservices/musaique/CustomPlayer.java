@@ -1,6 +1,9 @@
 package au.com.raicovtechnologyservices.musaique;
 
+import android.content.Context;
 import android.media.MediaPlayer;
+import android.renderscript.RSInvalidStateException;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -11,10 +14,11 @@ import java.io.IOException;
 public class CustomPlayer extends android.media.MediaPlayer {
 
     public android.media.MediaPlayer mediaPlayer;
+    public Context mContext;
 
-
-    public CustomPlayer(){
-        mediaPlayer = new android.media.MediaPlayer();
+    public CustomPlayer(Context context){
+        this.mediaPlayer = new android.media.MediaPlayer();
+        this.mContext = context;
     };
 
     public boolean playSong(String path){
@@ -33,7 +37,18 @@ public class CustomPlayer extends android.media.MediaPlayer {
                     mediaPlayer.reset();
                 }
             });
+            mediaPlayer.setOnErrorListener(new OnErrorListener() {
+                @Override
+                public boolean onError(MediaPlayer mp, int what, int extra) {
+                    Toast.makeText(mContext, "Media player entered Error state",Toast.LENGTH_SHORT).show();
+                    mediaPlayer.reset();
+                    return false;
+                }
+            });
         }catch(IOException e){
+            e.printStackTrace();
+            return false;
+        }catch(IllegalArgumentException e){
             e.printStackTrace();
             return false;
         }
