@@ -5,7 +5,6 @@ import android.annotation.TargetApi;
 import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +17,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,11 +31,18 @@ import static au.com.raicovtechnologyservices.musaique.MainActivity.EXTERNAL_STO
  * Created by Jamie on 10/04/2017.
  */
 
-public class LibraryListFragment extends Fragment implements RecyclerViewClickListener {
+public class LibraryListFragment extends Fragment implements Runnable, RecyclerViewClickListener {
 
     private ArrayList<Song> songs;
     private RecyclerView mLibraryList;
     private RecyclerView.LayoutManager mLibraryLayoutManager;
+
+    private ImageView npAlbumArt;
+    private TextView npSongTitle;
+    private TextView npArtistName;
+    private TextView npAlbumTitle;
+    private ProgressBar pb;
+    private int currentPosition;
 
     public CustomPlayer mediaPlayer;
     private File musicDirectory;
@@ -54,6 +64,9 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
 
         //instantiate media player
         mediaPlayer = new CustomPlayer(getContext());
+
+        pb = (ProgressBar) getActivity().findViewById(R.id.now_playing_music_progress);
+
 
         //Library List Stuff
         mLibraryList = (RecyclerView) rootView.findViewById(R.id.library_list_view);
@@ -121,7 +134,35 @@ public class LibraryListFragment extends Fragment implements RecyclerViewClickLi
 
     @Override
     public void recyclerViewListClicked(View v, int position) {
-        mediaPlayer.playSong(songs.get(position).getSongPath());
+        Song selectedSong = songs.get(position);
+        npAlbumArt = (ImageView)getActivity().findViewById(R.id.now_playing_album_art);
+        npAlbumArt.setImageBitmap(selectedSong.getAlbumArt());
 
+        npSongTitle = (TextView)getActivity().findViewById(R.id.now_playing_song_title);
+        npSongTitle.setText(selectedSong.getTrackTitle());
+
+        npArtistName = (TextView)getActivity().findViewById(R.id.now_playing_artist_name);
+        npArtistName.setText(selectedSong.getArtistName());
+
+        npAlbumTitle = (TextView)getActivity().findViewById(R.id.now_playing_album_title);
+        npAlbumTitle.setText(selectedSong.getAlbumTitle());
+
+        mediaPlayer.playSong(selectedSong.getSongPath(), getActivity());
+        new Thread(this).start();
+
+    }
+
+    @Override
+    public void run() {
+        while(mediaPlayer != null && mediaPlayer.getCurrentPosition() < mediaPlayer.getDuration()){
+            try{
+                Thread.sleep(1000);
+                currentPosition = mediaPlayer.getCurrentPosition();
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+            pb.setProgress(currentPosition);
+
+        }
     }
 }

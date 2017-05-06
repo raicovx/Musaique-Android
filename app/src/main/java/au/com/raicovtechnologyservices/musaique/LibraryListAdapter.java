@@ -1,6 +1,5 @@
 package au.com.raicovtechnologyservices.musaique;
 
-import android.media.MediaPlayer;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +8,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -27,7 +25,6 @@ public class LibraryListAdapter extends RecyclerView.Adapter<LibraryListAdapter.
         public TextView mAlbumTitle;
         public ImageView mAlbumArt;
         public TextView mSongDuration;
-        public int pos;
 
         public ViewHolder(View v) {
             super(v);
@@ -64,10 +61,10 @@ public class LibraryListAdapter extends RecyclerView.Adapter<LibraryListAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.mSongTitle.setText(songData.get(position).getTrackTitle());
-        holder.mAlbumTitle.setText(songData.get(position).getAlbumName());
+        holder.mAlbumTitle.setText(songData.get(position).getAlbumTitle());
         holder.mArtistName.setText(songData.get(position).getArtistName());
         holder.mAlbumArt.setImageBitmap(songData.get(position).getAlbumArt());
-        holder.pos = position;
+
     }
 
     @Override

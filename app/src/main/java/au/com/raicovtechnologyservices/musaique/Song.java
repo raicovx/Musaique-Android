@@ -52,7 +52,7 @@ public class Song {
 
     public String getSongPath() { return songPath; }
 
-    public String getAlbumName() {
+    public String getAlbumTitle() {
         return albumName;
     }
 

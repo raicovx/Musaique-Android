@@ -1,8 +1,9 @@
 package au.com.raicovtechnologyservices.musaique;
 
+import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.renderscript.RSInvalidStateException;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -11,17 +12,18 @@ import java.io.IOException;
  * Created by Jamie on 28/04/2017.
  */
 
-public class CustomPlayer extends android.media.MediaPlayer {
+public class CustomPlayer extends android.media.MediaPlayer{
 
     public android.media.MediaPlayer mediaPlayer;
     public Context mContext;
+    public boolean songDataIsSet = false;
 
     public CustomPlayer(Context context){
         this.mediaPlayer = new android.media.MediaPlayer();
         this.mContext = context;
     };
 
-    public boolean playSong(String path){
+    public boolean playSong(String path, final Activity activity){
         try {
             mediaPlayer.setDataSource(path);
             mediaPlayer.prepare();
@@ -29,8 +31,12 @@ public class CustomPlayer extends android.media.MediaPlayer {
                 @Override
                 public void onPrepared(android.media.MediaPlayer mp) {
                     mediaPlayer.start();
+                    ProgressBar pb = (ProgressBar) activity.findViewById(R.id.now_playing_music_progress);
+                    pb.setProgress(0);
+                    pb.setMax(mp.getDuration());
                 }
             });
+
             mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
@@ -45,6 +51,7 @@ public class CustomPlayer extends android.media.MediaPlayer {
                     return false;
                 }
             });
+
         }catch(IOException e){
             e.printStackTrace();
             return false;
@@ -56,4 +63,5 @@ public class CustomPlayer extends android.media.MediaPlayer {
 
         return true;
     }
+
 }

@@ -22,19 +22,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="16sp"
                 android:text="All Your Fault"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textColor="@color/colorPrimaryDark"/>
             <TextView
                 android:id="@+id/list_artist_name"
                 android:layout_width="match_parent"
                 android:layout_height="16sp"
                 android:text="Hopsin"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textColor="@color/colorPrimaryDark"/>
             <TextView
                 android:id="@+id/list_album_name"
                 android:layout_width="match_parent"
                 android:layout_height="16sp"
                 android:text="All Your Fault(Single)"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:textColor="@color/colorPrimaryDark"/>
 
         </LinearLayout>
 </LinearLayout>
