@@ -13,11 +13,15 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Transformation;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -38,6 +42,8 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
     private RecyclerView mLibraryList;
     private RecyclerView.LayoutManager mLibraryLayoutManager;
 
+    //Action Bar Media Control Declarations
+    private CardView mediaControls;
     private ImageView npAlbumArt;
     private TextView npSongTitle;
     private TextView npArtistName;
@@ -45,10 +51,15 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
     private FloatingActionButton fab;
     private ProgressBar pb;
     private int currentPosition;
+    private int initialHeight;
+    private int distanceToExpand;
+    private int targetHeight;
 
     public CustomPlayer mediaPlayer;
     private File musicDirectory;
 
+    //Animations
+    private Animation fab_show;
 
     public LibraryListFragment() {
         //Required Public Constructor
@@ -70,6 +81,8 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
         fab = (FloatingActionButton)getActivity().findViewById(R.id.np_play_pause);
         pb = (ProgressBar) getActivity().findViewById(R.id.now_playing_music_progress);
 
+        //Animations
+        fab_show = AnimationUtils.loadAnimation(getContext(), R.anim.fab_show);
 
         //Library List Stuff
         mLibraryList = (RecyclerView) rootView.findViewById(R.id.library_list_view);
@@ -164,6 +177,37 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
 
         npAlbumTitle = (TextView)getActivity().findViewById(R.id.now_playing_album_title);
         npAlbumTitle.setText(selectedSong.getAlbumTitle());
+
+        //Declare - Media Controls
+        mediaControls = (CardView)getActivity().findViewById(R.id.now_playing_media_control_panel);
+
+        //Animation - Media Controls
+        initialHeight = mediaControls.getHeight();
+
+        mediaControls.measure(ViewGroup.LayoutParams.MATCH_PARENT, 64);
+        targetHeight = mediaControls.getMeasuredHeight();
+        distanceToExpand = targetHeight - initialHeight;
+
+        Animation expandToolbar = new Animation() {
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if (interpolatedTime == 1){
+                    // Do this after expanded
+                }
+
+                mediaControls.getLayoutParams().height = (int) (initialHeight + (distanceToExpand * interpolatedTime));
+                mediaControls.requestLayout();
+            }
+        };
+
+        expandToolbar.setDuration((long) distanceToExpand);
+        mediaControls.startAnimation(expandToolbar);
+
 
         mediaPlayer.playSong(selectedSong.getSongPath(), getActivity());
         new Thread(this).start();

@@ -17,7 +17,8 @@ public class CustomPlayer extends android.media.MediaPlayer{
 
     public android.media.MediaPlayer mediaPlayer;
     public Context mContext;
-    public boolean songDataIsSet = false;
+
+
 
     public CustomPlayer(Context context){
         this.mediaPlayer = new android.media.MediaPlayer();
@@ -26,15 +27,16 @@ public class CustomPlayer extends android.media.MediaPlayer{
 
     public boolean playSong(String path, final Activity activity){
         try {
-            if(mediaPlayer.isPlaying()){
-                mediaPlayer.reset();
+            if(this.isPlaying()){
+                this.reset();
             }
-            mediaPlayer.setDataSource(path);
-            mediaPlayer.prepare();
-            mediaPlayer.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
+
+            this.setDataSource(path);
+            this.prepare();
+            this.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(android.media.MediaPlayer mp) {
-                    mediaPlayer.start();
+                    mp.start();
                     FloatingActionButton fab = (FloatingActionButton)activity.findViewById(R.id.np_play_pause);
                     fab.setImageResource(R.drawable.ic_pause_white_48dp);
                     fab.setClickable(true);
@@ -44,17 +46,18 @@ public class CustomPlayer extends android.media.MediaPlayer{
                 }
             });
 
-            mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+            this.setOnCompletionListener(new OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    mediaPlayer.reset();
+                    mp.reset();
+
                 }
             });
-            mediaPlayer.setOnErrorListener(new OnErrorListener() {
+            this.setOnErrorListener(new OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     Toast.makeText(mContext, "Media player entered Error state ",Toast.LENGTH_SHORT).show();
-                    mediaPlayer.reset();
+                    mp.reset();
                     return false;
                 }
             });
