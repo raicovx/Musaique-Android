@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -41,6 +42,7 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
     private TextView npSongTitle;
     private TextView npArtistName;
     private TextView npAlbumTitle;
+    private FloatingActionButton fab;
     private ProgressBar pb;
     private int currentPosition;
 
@@ -65,6 +67,7 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
         //instantiate media player
         mediaPlayer = new CustomPlayer(getContext());
 
+        fab = (FloatingActionButton)getActivity().findViewById(R.id.np_play_pause);
         pb = (ProgressBar) getActivity().findViewById(R.id.now_playing_music_progress);
 
 
@@ -72,6 +75,21 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
         mLibraryList = (RecyclerView) rootView.findViewById(R.id.library_list_view);
         mLibraryLayoutManager = new LinearLayoutManager(getActivity());
         mLibraryList.setLayoutManager(mLibraryLayoutManager);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mediaPlayer != null) {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.pause();
+                        fab.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+                    } else {
+                        mediaPlayer.start();
+                        fab.setImageResource(R.drawable.ic_pause_white_48dp);
+                    }
+                }
+            }
+        });
 
         //populate list
         getSongData();

@@ -3,6 +3,7 @@ package au.com.raicovtechnologyservices.musaique;
 import android.app.Activity;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.support.design.widget.FloatingActionButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -25,12 +26,18 @@ public class CustomPlayer extends android.media.MediaPlayer{
 
     public boolean playSong(String path, final Activity activity){
         try {
+            if(mediaPlayer.isPlaying()){
+                mediaPlayer.reset();
+            }
             mediaPlayer.setDataSource(path);
             mediaPlayer.prepare();
             mediaPlayer.setOnPreparedListener(new android.media.MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(android.media.MediaPlayer mp) {
                     mediaPlayer.start();
+                    FloatingActionButton fab = (FloatingActionButton)activity.findViewById(R.id.np_play_pause);
+                    fab.setImageResource(R.drawable.ic_pause_white_48dp);
+                    fab.setClickable(true);
                     ProgressBar pb = (ProgressBar) activity.findViewById(R.id.now_playing_music_progress);
                     pb.setProgress(0);
                     pb.setMax(mp.getDuration());
