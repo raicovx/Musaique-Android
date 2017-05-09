@@ -4,7 +4,7 @@
 
     <!-- Scale -->
     <scale
-        android:duration="2000"
+        android:duration="500"
         android:fromXScale="0.0"
         android:fromYScale="0.0"
         android:interpolator="@android:anim/linear_interpolator"
@@ -13,9 +13,9 @@
 
     <!--Fade In-->
     <alpha
-        android:duration="2000"
+        android:duration="500"
         android:fromAlpha="0.0"
-        android:interpolator="@android:anim/decelerate_interpolator"
+        android:interpolator="@android:anim/accelerate_interpolator"
         android:toAlpha="1.0"></alpha>
 
 </set>

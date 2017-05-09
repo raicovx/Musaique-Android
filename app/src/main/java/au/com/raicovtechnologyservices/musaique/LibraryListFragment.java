@@ -49,17 +49,23 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
     private TextView npArtistName;
     private TextView npAlbumTitle;
     private FloatingActionButton fab;
+
+    //--Progress Bar
     private ProgressBar pb;
     private int currentPosition;
+
+    //Animation Variables
     private int initialHeight;
     private int distanceToExpand;
     private int targetHeight;
+    private boolean fabIsVisible = false;
 
     public CustomPlayer mediaPlayer;
     private File musicDirectory;
 
     //Animations
     private Animation fab_show;
+    private Animation progress_expand;
 
     public LibraryListFragment() {
         //Required Public Constructor
@@ -83,6 +89,7 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
 
         //Animations
         fab_show = AnimationUtils.loadAnimation(getContext(), R.anim.fab_show);
+        progress_expand = AnimationUtils.loadAnimation(getContext(), R.anim.progress_expand);
 
         //Library List Stuff
         mLibraryList = (RecyclerView) rootView.findViewById(R.id.library_list_view);
@@ -113,6 +120,9 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
     private void getSongData() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             createPermissions();
+            if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                runMusicQuery();
+            }
         }else{
             runMusicQuery();
         }
@@ -125,8 +135,6 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
             if(!ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), permission)){
                 requestPermissions(new String[]{permission}, EXTERNAL_STORAGE_REQUEST_CODE);
             }
-        }else{
-            runMusicQuery();
         }
     }
 
@@ -154,9 +162,8 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
                 String artist = musicCursor.getString(artistColumn);
                 String album = musicCursor.getString(albumColumn);
                 long albumId = musicCursor.getLong(albumArtColumn);
-                String duration = musicCursor.getString(durationColumn);
                 String songPath =  musicCursor.getString(songPathColumn);
-                songs.add(new Song(id, title, artist, album, albumId, duration, songPath, getContext(), songs.size()));
+                songs.add(new Song(id, title, artist, album, albumId, songPath, getContext(), songs.size()));
 
             } while (musicCursor.moveToNext());
             mLibraryList.setAdapter(new LibraryListAdapter(songs, this));
@@ -202,11 +209,22 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
 
                 mediaControls.getLayoutParams().height = (int) (initialHeight + (distanceToExpand * interpolatedTime));
                 mediaControls.requestLayout();
+
+
             }
         };
 
+
         expandToolbar.setDuration((long) distanceToExpand);
         mediaControls.startAnimation(expandToolbar);
+
+        if(!fabIsVisible) {
+            fab.setVisibility(View.VISIBLE);
+            fab.startAnimation(fab_show);
+            pb.setVisibility(View.VISIBLE);
+            pb.startAnimation(progress_expand);
+            fabIsVisible = true;
+        }
 
 
         mediaPlayer.playSong(selectedSong.getSongPath(), getActivity());

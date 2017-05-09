@@ -19,7 +19,6 @@ public class Song {
     private String trackTitle;
     private String artistName;
     private String albumName;
-    private String duration;
     private String songPath;
     private long id;
     private long albumId;
@@ -29,13 +28,12 @@ public class Song {
 
     private int position;
 
-    public Song(long id, String trackTitle, String artistName, String albumName, long albumId, String duration, String songPath, Context context, int position){
+    public Song(long id, String trackTitle, String artistName, String albumName, long albumId, String songPath, Context context, int position){
         this.id = id;
         this.trackTitle = trackTitle;
         this.artistName = artistName;
         this.albumName = albumName;
         this.albumId = albumId;
-        this.duration = duration;
         this.context = context;
         this.songPath = songPath;
         this.position = position;
@@ -56,9 +54,6 @@ public class Song {
         return albumName;
     }
 
-    public String getDuration() {
-        return duration;
-    }
 
     public Bitmap getAlbumArt()
     {
@@ -83,7 +78,4 @@ public class Song {
         return bm;
     }
 
-    public int getPosition() {
-        return position;
-    }
 }

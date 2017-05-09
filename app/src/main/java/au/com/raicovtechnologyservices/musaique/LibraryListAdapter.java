@@ -24,7 +24,6 @@ public class LibraryListAdapter extends RecyclerView.Adapter<LibraryListAdapter.
         public TextView mArtistName;
         public TextView mAlbumTitle;
         public ImageView mAlbumArt;
-        public TextView mSongDuration;
 
         public ViewHolder(View v) {
             super(v);
@@ -64,7 +63,6 @@ public class LibraryListAdapter extends RecyclerView.Adapter<LibraryListAdapter.
         holder.mAlbumTitle.setText(songData.get(position).getAlbumTitle());
         holder.mArtistName.setText(songData.get(position).getArtistName());
         holder.mAlbumArt.setImageBitmap(songData.get(position).getAlbumArt());
-
     }
 
     @Override
