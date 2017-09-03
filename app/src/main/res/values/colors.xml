@@ -3,6 +3,8 @@
     <color name="colorPrimary">#393e46</color>
     <color name="colorPrimaryDark">#222831</color>
     <color name="colorAccent">#fd7014</color>
-    <color name="drawerBackgroundColor">#eeeeee</color>
+    <color name="drawerBackgroundColor">#DDDDDD</color>
     <color name="cardBackground">#FDFDFD</color>
+    <color name="action_bar_text_color">#FDFDFD</color>
+    <color name="menu_item_text_color">#222222</color>
 </resources>

@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         //Create List View Adapter
-        navigationList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, menuItems));
+        navigationList.setAdapter(new ArrayAdapter<String>(this, R.layout.menu_list_item, menuItems));
 
         //Menu & ToolBar Actions
         navigationList.setOnItemClickListener(new AdapterView.OnItemClickListener() {

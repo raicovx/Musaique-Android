@@ -218,7 +218,7 @@ public class LibraryListFragment extends Fragment implements Runnable, RecyclerV
         expandToolbar.setDuration((long) distanceToExpand);
         mediaControls.startAnimation(expandToolbar);
 
-        if(!fabIsVisible) {
+        if(fab.getVisibility() != View.VISIBLE ) {
             fab.setVisibility(View.VISIBLE);
             fab.startAnimation(fab_show);
             pb.setVisibility(View.VISIBLE);
