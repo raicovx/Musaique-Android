@@ -2,4 +2,6 @@
     <string name="app_name">Musaique</string>
     <string name="open_drawer">Open Drawer</string>
     <string name="close_drawer">Close Drawer</string>
+    <string name="notification_channel_name">Playback Controls</string>
+    <string name="notification_channel_desc">Disabling this will hide the music controls in the notification panel, you will need to open the app to control music.</string>
 </resources>
