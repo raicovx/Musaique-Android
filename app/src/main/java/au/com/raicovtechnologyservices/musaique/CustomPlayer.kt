@@ -2,9 +2,9 @@ package au.com.raicovtechnologyservices.musaique
 
 import android.Manifest
 import android.annotation.TargetApi
-import android.app.Activity
-import android.app.Notification
+import android.app.*
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.os.Build
@@ -30,6 +30,15 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     private var allSongsList: ArrayList<Song>? = null
     private var currentPlaylist: ArrayList<Song>? = null
     private var currentPos: Int = 0
+    val pendingIntent: PendingIntent
+        get() {
+            val openMainIntent = Intent(this.mContext, MainActivity::class.java)
+            val stackBuilder = TaskStackBuilder.create(mContext)
+            stackBuilder.addParentStack(MainActivity::class.java)
+            stackBuilder.addNextIntent(openMainIntent)
+            return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT)
+        }
+
 
     init {
 
@@ -39,7 +48,9 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
     fun playSong(song:Song, songs:ArrayList<Song>, position: Int,  activity: Activity): Boolean {
         try {
-
+            if(this.isPlaying) {
+                this.stop()
+            }
             this.reset()
             this.setDataSource(song.songPath)
             this.prepare()
@@ -67,7 +78,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
                 pb.progress = 0
                 pb.max = mp.duration
                 Thread(this).start()
-
+                createNotificationControls(song.trackTitle+" - "+ song.artistName, song.albumTitle)
             }
 
             this.setOnCompletionListener { mp -> mp.reset() }
@@ -85,7 +96,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             return false
         }
 
-        createNotificationControls(song.trackTitle+" - "+ song.artistName, song.albumTitle)
+
         return true
     }
 
@@ -139,12 +150,19 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     }
     @TargetApi(26)
     private fun createNotificationControlsWithChannel(notificationTitleString: String, notificationContentString: String, CHANNEL_ID: String) {
+
         val mBuilder: Notification.Builder = Notification.Builder(this.mContext, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_headphone)
                 .setContentTitle(notificationTitleString)
                 .setContentText(notificationContentString)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
 
-    }
+        val mNotificationManager: NotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+               mNotificationManager.notify(1, mBuilder.build())
+        }
+
 
     override fun run() {
         while (this != null && this.isPlaying && this.currentPosition < this.duration) {
