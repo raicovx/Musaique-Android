@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
+import android.opengl.Visibility
 import android.os.Build
 import android.provider.MediaStore
 import android.support.design.widget.FloatingActionButton
@@ -169,12 +170,15 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
                 .setSmallIcon(R.drawable.ic_headphone)
                 .setContentTitle(notificationTitleString)
                 .setContentText(notificationContentString)
-                .setAutoCancel(true)
+                .setOngoing(true)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
 
-        val mNotificationManager: NotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-               mNotificationManager.notify(1, mBuilder.build())
+        val mNotificationManager: NotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        var notification: Notification = mBuilder.build()
+        notification.flags = Notification.FLAG_NO_CLEAR
+        mNotificationManager.notify(1, notification)
         }
 
 

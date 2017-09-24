@@ -2,12 +2,14 @@ package au.com.raicovtechnologyservices.musaique
 
 import android.Manifest
 import android.annotation.TargetApi
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
+import android.media.AudioAttributes
 import android.os.Build
 import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
@@ -138,8 +140,13 @@ class MainActivity : AppCompatActivity() {
         val desc: String = getString(R.string.notification_channel_desc)
         val importance = NotificationManager.IMPORTANCE_NONE
 
+
         val mChannel: NotificationChannel = NotificationChannel(id, name, importance)
         mChannel.description = desc
+        mChannel.setSound(null, null)
+        mChannel.vibrationPattern = null
+        mChannel.enableVibration(false)
+
         mNotificationManager.createNotificationChannel(mChannel)
     }
 
@@ -184,7 +191,11 @@ class MainActivity : AppCompatActivity() {
                 fragment.setMediaPlayer(mediaPlayer as CustomPlayer)
                 tag = "Playlists"
             }
-
+            2 -> {
+                fragment = ArtistGridFragment()
+                fragment.setMediaPlayer(mediaPlayer as CustomPlayer)
+                tag = "Artists"
+            }
 
             else -> {
                 fragment = LibraryListFragment()
@@ -214,8 +225,7 @@ class MainActivity : AppCompatActivity() {
         mDrawerToggle!!.onConfigurationChanged(newConfig)
     }
 
-
-
+   
 
 
 
