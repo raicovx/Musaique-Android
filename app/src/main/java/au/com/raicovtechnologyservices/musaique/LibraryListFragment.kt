@@ -65,7 +65,7 @@ class LibraryListFragment : Fragment(), RecyclerViewClickListener {
         val rootView = inflater!!.inflate(R.layout.library_list_fragment, container, false)
 
         //declare song array
-        songs = mMediaPlayer!!.getAllSongs()
+        songs = mMediaPlayer!!.allSongsList
 
 
         //Declare - Media Controls

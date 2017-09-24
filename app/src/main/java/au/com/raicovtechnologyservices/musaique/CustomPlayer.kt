@@ -7,12 +7,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
+import android.media.session.MediaSession
+import android.media.session.MediaSessionManager
 import android.opengl.Visibility
 import android.os.Build
 import android.provider.MediaStore
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.app.NotificationBuilderWithBuilderAccessor
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -22,15 +26,20 @@ import java.io.IOException
 
 class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnable {
 
+    //Media Session
+    public var mMediaSession: MediaSessionCompat = MediaSessionCompat(mContext, "Musaique")
+
+    //Now Playing info
     private var npAlbumArt: ImageView? = null
     private var npSongTitle: TextView? = null
     private var npArtistName: TextView? = null
     private var npAlbumTitle: TextView? = null
     private var currentFragmentProgressBar: ProgressBar? = null;
+
     //Song Lists
-    private var allSongsList: ArrayList<Song>? = null
-    private var currentPlaylist: ArrayList<Song>? = null
-    private var artistList: ArrayList<Artist>? = null
+    public var allSongsList: ArrayList<Song>? = null
+    public var currentPlaylist: ArrayList<Song>? = null
+    public var artistList: ArrayList<Artist>? = null
     private var currentPos: Int = 0
     val pendingIntent: PendingIntent
         get() {
@@ -41,11 +50,12 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT)
         }
 
-
     init {
 
         allSongsList = ArrayList()
         artistList = ArrayList()
+
+
         findAllSongs()
     }
 
@@ -59,6 +69,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             this.prepare()
             this.currentPlaylist = songs;
             this.currentPos = position
+
 
             npAlbumArt = activity.findViewById(R.id.now_playing_album_art)
             npAlbumArt!!.setImageBitmap(song.albumArt)
@@ -168,11 +179,15 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
         val mBuilder: Notification.Builder = Notification.Builder(this.mContext, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_headphone)
+
                 .setContentTitle(notificationTitleString)
                 .setContentText(notificationContentString)
+
+                .setStyle(Notification.MediaStyle())
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
+
 
 
         val mNotificationManager: NotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

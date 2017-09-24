@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity() {
         mDrawerToggle!!.onConfigurationChanged(newConfig)
     }
 
-   
+
 
 
 
