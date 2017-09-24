@@ -29,6 +29,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     //Song Lists
     private var allSongsList: ArrayList<Song>? = null
     private var currentPlaylist: ArrayList<Song>? = null
+    private var artistList: ArrayList<Artist>? = null
     private var currentPos: Int = 0
     val pendingIntent: PendingIntent
         get() {
@@ -43,6 +44,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     init {
 
         allSongsList = ArrayList()
+        artistList = ArrayList()
         findAllSongs()
     }
 
@@ -110,36 +112,48 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
         val musicUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
         val musicCursor = musicResolver.query(musicUri, null, selection, null, null)
-        musicCursor!!.moveToFirst()
-        //get Columns
-        val titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
-        val idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID)
-        val artistColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
-        val albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)
-        val albumArtColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)
-        val durationColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION)
-        val songPathColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA)
+        if(musicCursor.count > 0) {
+            musicCursor!!.moveToFirst()
+            //get Columns
+            val titleColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+            val idColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media._ID)
+            val artistColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
+            val albumColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)
+            val albumArtColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID)
+            val durationColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DURATION)
+            val songPathColumn = musicCursor.getColumnIndex(MediaStore.Audio.Media.DATA)
 
 
-        //add songs to list
-        do {
-            val id = musicCursor.getLong(idColumn)
-            val title = musicCursor.getString(titleColumn)
-            val artist = musicCursor.getString(artistColumn)
-            val album = musicCursor.getString(albumColumn)
-            val albumId = musicCursor.getLong(albumArtColumn)
-            val songPath = musicCursor.getString(songPathColumn)
-            allSongsList!!.add(Song(id, title, artist, album, albumId, songPath, mContext, allSongsList!!.size))
+            //add songs to list
+            do {
+                val id = musicCursor.getLong(idColumn)
+                val title = musicCursor.getString(titleColumn)
+                val artist = musicCursor.getString(artistColumn)
+                val album = musicCursor.getString(albumColumn)
+                val albumId = musicCursor.getLong(albumArtColumn)
+                val songPath = musicCursor.getString(songPathColumn)
+                allSongsList!!.add(Song(id, title, artist, album, albumId, songPath, mContext, allSongsList!!.size))
 
-        } while (musicCursor.moveToNext())
+                var artistFilter: List<Artist> = artistList!!.filter{currArtist -> currArtist.artistName == artist as String}
+                if(artistFilter.isEmpty()) {
+                    artistList!!.add(Artist(artist))
+                }
+            } while (musicCursor.moveToNext())
+
+            for(artist: Artist in artistList as ArrayList<Artist>){
+                artist.getArtistSongsAndAlbums(allSongsList as ArrayList<Song>)
+            }
+        }else{
+            //TODO: Display feedback to inform the user no music could be found.
+        }
     }
 
 
     fun createNotificationControls(notificationTitleString: String, notificationContentString: String){
-        val CHANNEL_ID: String = "musaique_channel"
+        val channelId: String = "musaique_channel"
 
         if(Build.VERSION.SDK_INT > 25) {
-            createNotificationControlsWithChannel(notificationTitleString, notificationContentString, CHANNEL_ID)
+            createNotificationControlsWithChannel(notificationTitleString, notificationContentString, channelId)
 
         }else{
             val mBuilder: NotificationCompat.Builder = NotificationCompat.Builder(mContext)
@@ -178,7 +192,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
         }
     }
 
-    fun setCurrentFragmentProgressBar(now_playing_music_progress: ProgressBar?) {
+    public fun setCurrentFragmentProgressBar(now_playing_music_progress: ProgressBar?) {
         this.currentFragmentProgressBar = now_playing_music_progress
     }
 }

@@ -56,17 +56,13 @@ class MainActivity : AppCompatActivity() {
         menuItems = resources.getStringArray(R.array.menu_items)
 
         //Instantiate global media player
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             createPermissions()
             if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                mediaPlayer = CustomPlayer(this)
-            }
-        } else {
-            mediaPlayer = CustomPlayer(this)
-        }
 
+            }
+        }
+        mediaPlayer = CustomPlayer(this)
 
 
 
@@ -82,7 +78,9 @@ class MainActivity : AppCompatActivity() {
                     .beginTransaction()
                     .add(R.id.content_fragment, libraryListFragment, "Library")
                     .commit()
-            libraryListFragment.setMediaPlayer(mediaPlayer as CustomPlayer);
+
+                libraryListFragment.setMediaPlayer(mediaPlayer as CustomPlayer);
+
         }
 
         //Create List View Adapter
@@ -138,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         //User Visible Name and Description of Channel
         val name: CharSequence = getString(R.string.notification_channel_name)
         val desc: String = getString(R.string.notification_channel_desc)
-        val importance = NotificationManager.IMPORTANCE_HIGH
+        val importance = NotificationManager.IMPORTANCE_NONE
 
         val mChannel: NotificationChannel = NotificationChannel(id, name, importance)
         mChannel.description = desc
@@ -186,6 +184,7 @@ class MainActivity : AppCompatActivity() {
                 fragment.setMediaPlayer(mediaPlayer as CustomPlayer)
                 tag = "Playlists"
             }
+
 
             else -> {
                 fragment = LibraryListFragment()
