@@ -42,25 +42,45 @@ class MainActivity : AppCompatActivity() {
     private var navigationList: ListView? = null
     private var mDrawerToggle: ActionBarDrawerToggle? = null
     private var mediaPlayer: CustomPlayer? = null
-    val KEY_PREV: String ="au.com.raicovtechnologyservices.musaique.CustomPlayer.prevSong"
+
+    //Broadcast Decs
+    val KEY_PREV: String = "prevSong"
+    val KEY_PLAY: String = "resumeSong"
+    val KEY_PAUSE: String = "pauseSong"
+    val KEY_NEXT: String = "nextSong"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //BroadcastReceiver
-        var filter: IntentFilter = IntentFilter();
-        filter.addAction(KEY_PREV);
-        // Add other actions as needed
+        var filter: IntentFilter = IntentFilter()
+        filter.addAction(KEY_PREV)
+        filter.addAction(KEY_PLAY)
+        filter.addAction(KEY_PAUSE)
+        filter.addAction(KEY_NEXT)
+
 
         val receiver = object: BroadcastReceiver(){
             override fun onReceive(p0: Context?, p1: Intent?) {
                 when(p1!!.action){
                     KEY_PREV -> mediaPlayer!!.prevSong()
+                    KEY_PLAY -> {
+                        mediaPlayer!!.resumeSong()
+
+                    }
+                    KEY_PAUSE ->{
+                        mediaPlayer!!.pauseSong()
+                    }
+
+                    KEY_NEXT -> {
+                        mediaPlayer!!.nextSong()
+                    }
                 }
             }
-
         }
+
+
 
         registerReceiver(receiver, filter)
 
@@ -171,6 +191,8 @@ class MainActivity : AppCompatActivity() {
         mChannel.enableVibration(false)
 
         mNotificationManager.createNotificationChannel(mChannel)
+
+
     }
 
     @TargetApi(23)
@@ -231,6 +253,11 @@ class MainActivity : AppCompatActivity() {
         mDrawerToggle!!.onConfigurationChanged(newConfig)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        var mNotificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        mNotificationManager.cancel(0)
+    }
 
 
 

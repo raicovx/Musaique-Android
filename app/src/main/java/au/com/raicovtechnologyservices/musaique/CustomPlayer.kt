@@ -47,7 +47,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     private var currentPos: Int = 0
 
     //Intents
-    val KEY_PREV: String ="au.com.raicovtechnologyservices.musaique.CustomPlayer.prevSong"
+
     val pendingIntent: PendingIntent
         get() {
             val openMainIntent = Intent(this.mContext, MainActivity::class.java)
@@ -56,9 +56,25 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             stackBuilder.addNextIntent(openMainIntent)
             return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT)
         }
-
+    //Previous Broadcast decs
+    val KEY_PREV: String ="prevSong"
     val prevIntent: Intent = Intent(KEY_PREV)
     val prevPendingIntent: PendingIntent = PendingIntent.getBroadcast(mContext, 0, prevIntent, 0)
+
+    //Play Broadcast decs
+    val KEY_PLAY = "resumeSong"
+    val playIntent: Intent = Intent(KEY_PLAY)
+    val playPendingIntent: PendingIntent = PendingIntent.getBroadcast(mContext, 0, playIntent, 0)
+
+    //Pause Broadcast Decs
+    val KEY_PAUSE = "pauseSong"
+    val pauseIntent: Intent = Intent(KEY_PAUSE)
+    val pausePendingIntent: PendingIntent = PendingIntent.getBroadcast(mContext, 0, pauseIntent, 0)
+
+    //Next Broadcast Decs
+    val KEY_NEXT: String = "nextSong"
+    val nextIntent: Intent = Intent(KEY_NEXT)
+    val nextPendingIntent: PendingIntent = PendingIntent.getBroadcast(mContext, 0, nextIntent,0)
     init {
 
         allSongsList = ArrayList()
@@ -82,7 +98,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
             this.setOnPreparedListener { mp ->
                 mp.start()
-                createNotificationControls(currentPlaylist!![currentPos].trackTitle+" - "+ currentPlaylist!![currentPos].artistName, currentPlaylist!![currentPos].albumTitle)
+                createNotificationControls()
                 updateFragmentUI(currentFragment.activity)
             }
 
@@ -104,8 +120,17 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
         return true
     }
+    fun resumeSong(){
+        this.start()
+        createNotificationControls()
+    }
 
-    public fun prevSong(){
+    fun pauseSong(){
+        this.pause()
+        createNotificationControls()
+    }
+
+    fun prevSong(){
         this.stop()
         this.reset()
         when(currentPos) {
@@ -116,6 +141,24 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             else -> {
                 this.setDataSource(this.currentPlaylist!![this.currentPos - 1].songPath)
                 this.currentPos = this.currentPos - 1
+            }
+        }
+
+        this.prepareAsync()
+
+
+    }
+    fun nextSong(){
+        this.stop()
+        this.reset()
+        when(currentPos) {
+            (this.currentPlaylist!!.size - 1) -> {
+                this.currentPos = 0
+                this.setDataSource(this.currentPlaylist!![0].songPath)
+            }
+            else -> {
+                this.setDataSource(this.currentPlaylist!![this.currentPos + 1].songPath)
+                this.currentPos = this.currentPos + 1
             }
         }
 
@@ -197,21 +240,35 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     }
 
 
+
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationControls(notificationTitleString: String, notificationContentString: String) {
+    fun createNotificationControls() {
         val channelId: String = "musaique_channel"
         val mBuilder: Notification.Builder = Notification.Builder(this.mContext)
                 .setSmallIcon(R.drawable.ic_headphone)
-                .setContentTitle(notificationTitleString)
-                .setContentText(notificationContentString)
+                .setContentTitle(currentPlaylist!![currentPos].trackTitle+" - "+ currentPlaylist!![currentPos].artistName)
+                .setContentText(currentPlaylist!![currentPos].albumTitle)
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
                 .setChannelId(channelId)
-                .setStyle(Notification.MediaStyle().setMediaSession(mMediaSession.sessionToken).setShowActionsInCompactView(0))
-                .addAction(R.drawable.ic_skip_previous, "Previous", prevPendingIntent) //TODO replace with AddAction(Action)
+                .setStyle(Notification.MediaStyle().setMediaSession(mMediaSession.sessionToken).setShowActionsInCompactView(0, 1, 2))
 
+                //TODO replace these with AddAction(Action)
+        when(this.isPlaying) {
+            true -> {
+                mBuilder.addAction(R.drawable.ic_skip_previous, "Previous", prevPendingIntent)
+                mBuilder.addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)
+                mBuilder.addAction(R.drawable.ic_skip_next, "Next", nextPendingIntent)
+            }
+            else->{
+                mBuilder.addAction(R.drawable.ic_skip_previous, "Previous", prevPendingIntent)
+                mBuilder.addAction(R.drawable.ic_play_arrow, "Play", playPendingIntent)
+                mBuilder.addAction(R.drawable.ic_skip_next, "Next", nextPendingIntent)
+            }
 
+        }
 
 
         val mNotificationManager: NotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
