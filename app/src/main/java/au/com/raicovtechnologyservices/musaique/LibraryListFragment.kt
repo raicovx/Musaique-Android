@@ -1,14 +1,7 @@
 package au.com.raicovtechnologyservices.musaique
 
-import android.Manifest
-import android.annotation.TargetApi
-import android.app.Activity
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.support.design.widget.FloatingActionButton
-import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
@@ -24,6 +17,7 @@ import android.view.animation.Transformation
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import org.w3c.dom.TypeInfo
 
 import java.io.File
 import kotlin.collections.ArrayList
@@ -95,7 +89,7 @@ class LibraryListFragment : Fragment(), RecyclerViewClickListener {
     //Media Player Transport for Fragments
     public fun setMediaPlayer(mediaPlayer:CustomPlayer){
         mMediaPlayer = mediaPlayer
-
+        mMediaPlayer!!.currentFragment = this as Fragment
     }
 
 
@@ -143,7 +137,8 @@ class LibraryListFragment : Fragment(), RecyclerViewClickListener {
         }
 
 
-        mMediaPlayer!!.playSong(selectedSong, songs as ArrayList<Song>, position, activity)
+        mMediaPlayer!!.playSong(selectedSong, songs as ArrayList<Song>, position)
+
         mMediaPlayer?.let{ mediaPlayer -> mediaPlayer.setCurrentFragmentProgressBar(activity.findViewById(R.id.now_playing_music_progress))}
 
     }

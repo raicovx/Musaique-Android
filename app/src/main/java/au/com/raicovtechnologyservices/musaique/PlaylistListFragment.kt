@@ -25,6 +25,7 @@ class PlaylistListFragment : Fragment() {
 
     fun setMediaPlayer(mediaPlayer: CustomPlayer){
         mMediaPlayer = mediaPlayer
+        mMediaPlayer!!.currentFragment = this
     }
 
 }//Required Public Constructor

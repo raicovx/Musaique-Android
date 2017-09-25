@@ -7,16 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
-import android.media.session.MediaSession
 import android.media.session.MediaSessionManager
 import android.opengl.Visibility
 import android.os.Build
 import android.provider.MediaStore
+import android.support.annotation.RequiresApi
 import android.support.design.widget.FloatingActionButton
+import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationBuilderWithBuilderAccessor
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
-import android.support.v4.media.session.MediaSessionCompat
+import android.media.session.MediaSession
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -27,7 +28,10 @@ import java.io.IOException
 class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnable {
 
     //Media Session
-    public var mMediaSession: MediaSessionCompat = MediaSessionCompat(mContext, "Musaique")
+    public var mMediaSession: MediaSession = MediaSession(mContext, "Musaique")
+
+    //UI Helper
+    public lateinit var currentFragment: Fragment
 
     //Now Playing info
     private var npAlbumArt: ImageView? = null
@@ -41,6 +45,9 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     public var currentPlaylist: ArrayList<Song>? = null
     public var artistList: ArrayList<Artist>? = null
     private var currentPos: Int = 0
+
+    //Intents
+    val KEY_PREV: String ="au.com.raicovtechnologyservices.musaique.CustomPlayer.prevSong"
     val pendingIntent: PendingIntent
         get() {
             val openMainIntent = Intent(this.mContext, MainActivity::class.java)
@@ -50,6 +57,8 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             return stackBuilder.getPendingIntent(0, PendingIntent.FLAG_ONE_SHOT)
         }
 
+    val prevIntent: Intent = Intent(KEY_PREV)
+    val prevPendingIntent: PendingIntent = PendingIntent.getBroadcast(mContext, 0, prevIntent, 0)
     init {
 
         allSongsList = ArrayList()
@@ -57,9 +66,21 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
 
         findAllSongs()
+        this.setOnPreparedListener { mp ->
+            mp.start()
+            createNotificationControls(currentPlaylist!![currentPos].trackTitle+" - "+ currentPlaylist!![currentPos].artistName, currentPlaylist!![currentPos].albumTitle)
+            updateFragmentUI(currentFragment.activity)
+        }
+
+        this.setOnCompletionListener { mp -> mp.reset() }
+        this.setOnErrorListener { mp, what, extra ->
+
+            mp.reset()
+            false
+        }
     }
 
-    fun playSong(song:Song, songs:ArrayList<Song>, position: Int,  activity: Activity): Boolean {
+    fun playSong(song:Song, songs:ArrayList<Song>, position: Int): Boolean {
         try {
             if(this.isPlaying) {
                 this.stop()
@@ -67,40 +88,9 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             this.reset()
             this.setDataSource(song.songPath)
             this.prepare()
-            this.currentPlaylist = songs;
+            this.currentPlaylist = songs
             this.currentPos = position
 
-
-            npAlbumArt = activity.findViewById(R.id.now_playing_album_art)
-            npAlbumArt!!.setImageBitmap(song.albumArt)
-
-            npSongTitle = activity.findViewById(R.id.now_playing_song_title)
-            npSongTitle!!.text = song.trackTitle
-
-            npArtistName = activity.findViewById(R.id.now_playing_artist_name)
-            npArtistName!!.text = song.artistName
-
-            npAlbumTitle = activity.findViewById(R.id.now_playing_album_title)
-            npAlbumTitle!!.text = song.albumTitle
-
-            this.setOnPreparedListener { mp ->
-                mp.start()
-                val fab: FloatingActionButton = activity.findViewById(R.id.np_play_pause)
-                fab.setImageResource(R.drawable.ic_pause_white_48dp)
-                fab.isClickable = true
-                val pb: ProgressBar = activity.findViewById(R.id.now_playing_music_progress)
-                pb.progress = 0
-                pb.max = mp.duration
-                Thread(this).start()
-                createNotificationControls(song.trackTitle+" - "+ song.artistName, song.albumTitle)
-            }
-
-            this.setOnCompletionListener { mp -> mp.reset() }
-            this.setOnErrorListener { mp, what, extra ->
-
-                mp.reset()
-                false
-            }
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -112,6 +102,39 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
 
         return true
+    }
+
+    public fun prevSong(){
+        when{
+            currentPos == 0 -> { playSong(currentPlaylist!![currentPlaylist!!.size-1], currentPlaylist!!, currentPlaylist!!.size-1)}
+            else -> playSong(currentPlaylist!![currentPos - 1], currentPlaylist!!, currentPosition-1)
+
+        }
+
+    }
+
+    public fun updateFragmentUI(activity: Activity) {
+
+            npAlbumArt = activity.findViewById(R.id.now_playing_album_art)
+            npAlbumArt!!.setImageBitmap(currentPlaylist!![currentPos].albumArt)
+
+            npSongTitle = activity.findViewById(R.id.now_playing_song_title)
+            npSongTitle!!.text = currentPlaylist!![currentPos].trackTitle
+
+            npArtistName = activity.findViewById(R.id.now_playing_artist_name)
+            npArtistName!!.text = currentPlaylist!![currentPos].artistName
+
+            npAlbumTitle = activity.findViewById(R.id.now_playing_album_title)
+            npAlbumTitle!!.text = currentPlaylist!![currentPos].albumTitle
+
+            val fab: FloatingActionButton = activity.findViewById(R.id.np_play_pause)
+            fab.setImageResource(R.drawable.ic_pause_white_48dp)
+            fab.isClickable = true
+            val pb: ProgressBar = activity.findViewById(R.id.now_playing_music_progress)
+            pb.progress = 0
+            pb.max = this.duration
+            Thread(this).start()
+
     }
 
     public fun getAllSongs(): ArrayList<Song>?{
@@ -161,37 +184,27 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     }
 
 
-    fun createNotificationControls(notificationTitleString: String, notificationContentString: String){
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationControls(notificationTitleString: String, notificationContentString: String) {
         val channelId: String = "musaique_channel"
-
-        if(Build.VERSION.SDK_INT > 25) {
-            createNotificationControlsWithChannel(notificationTitleString, notificationContentString, channelId)
-
-        }else{
-            val mBuilder: NotificationCompat.Builder = NotificationCompat.Builder(mContext)
-                    .setSmallIcon(R.drawable.ic_headphone)
-                    .setContentTitle(notificationTitleString)
-                    .setContentText(notificationContentString)
-        }
-    }
-    @TargetApi(26)
-    private fun createNotificationControlsWithChannel(notificationTitleString: String, notificationContentString: String, CHANNEL_ID: String) {
-
-        val mBuilder: Notification.Builder = Notification.Builder(this.mContext, CHANNEL_ID)
+        val mBuilder: Notification.Builder = Notification.Builder(this.mContext)
                 .setSmallIcon(R.drawable.ic_headphone)
-
                 .setContentTitle(notificationTitleString)
                 .setContentText(notificationContentString)
-
-                .setStyle(Notification.MediaStyle())
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
+                .setChannelId(channelId)
+                .setStyle(Notification.MediaStyle().setMediaSession(mMediaSession.sessionToken).setShowActionsInCompactView(0))
+                .addAction(R.drawable.ic_skip_previous, "Previous", prevPendingIntent)
+
 
 
 
         val mNotificationManager: NotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         var notification: Notification = mBuilder.build()
+
+
         notification.flags = Notification.FLAG_NO_CLEAR
         mNotificationManager.notify(1, notification)
         }

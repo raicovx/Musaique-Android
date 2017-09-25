@@ -2,10 +2,14 @@ package au.com.raicovtechnologyservices.musaique
 
 import android.Manifest
 import android.annotation.TargetApi
+import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -37,11 +41,28 @@ class MainActivity : AppCompatActivity() {
     private var navigationDrawer: DrawerLayout? = null
     private var navigationList: ListView? = null
     private var mDrawerToggle: ActionBarDrawerToggle? = null
-    var mediaPlayer: CustomPlayer? = null
+    private var mediaPlayer: CustomPlayer? = null
+    val KEY_PREV: String ="au.com.raicovtechnologyservices.musaique.CustomPlayer.prevSong"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //Intent Filter
+        var filter: IntentFilter = IntentFilter()
+        filter.addAction(KEY_PREV)
+
+        class receiver: BroadcastReceiver(){
+            override fun onReceive(p0: Context?, p1: Intent?) {
+                when{
+                    intent.action == KEY_PREV -> mediaPlayer!!.prevSong()
+                }
+            }
+
+
+        }
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             createPermissions()
         }
@@ -53,8 +74,8 @@ class MainActivity : AppCompatActivity() {
 
         //Declarations
         //Navigation
-        navigationList =  findViewById(R.id.navigation_list_view) as ListView
-        navigationDrawer = findViewById(R.id.navigation_drawer_layout) as DrawerLayout
+        navigationList =  findViewById(R.id.navigation_list_view)
+        navigationDrawer = findViewById(R.id.navigation_drawer_layout)
         menuItems = resources.getStringArray(R.array.menu_items)
 
         //Instantiate global media player
@@ -81,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                     .add(R.id.content_fragment, libraryListFragment, "Library")
                     .commit()
 
-                libraryListFragment.setMediaPlayer(mediaPlayer as CustomPlayer);
+                libraryListFragment.setMediaPlayer(mediaPlayer as CustomPlayer)
 
         }
 
@@ -89,12 +110,12 @@ class MainActivity : AppCompatActivity() {
         navigationList!!.adapter = ArrayAdapter(this, R.layout.menu_list_item, menuItems!!)
 
         //Menu & ToolBar Actions
-        val fab: FloatingActionButton = findViewById(R.id.np_play_pause) as FloatingActionButton
+        val fab: FloatingActionButton = findViewById(R.id.np_play_pause)
         navigationList!!.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> selectItem(position) }
         title = menuItems!![navigationList!!.selectedItemPosition]
 
 
-        val toolbar = findViewById(R.id.tool_bar) as Toolbar
+        val toolbar = findViewById<Toolbar>(R.id.tool_bar)
         setSupportActionBar(toolbar)
         val actionBar = supportActionBar
         if (actionBar != null) {
@@ -138,33 +159,15 @@ class MainActivity : AppCompatActivity() {
         //User Visible Name and Description of Channel
         val name: CharSequence = getString(R.string.notification_channel_name)
         val desc: String = getString(R.string.notification_channel_desc)
-        val importance = NotificationManager.IMPORTANCE_NONE
+        val importance = NotificationManager.IMPORTANCE_LOW
 
 
         val mChannel: NotificationChannel = NotificationChannel(id, name, importance)
         mChannel.description = desc
-        mChannel.setSound(null, null)
         mChannel.vibrationPattern = null
         mChannel.enableVibration(false)
 
         mNotificationManager.createNotificationChannel(mChannel)
-    }
-
-    //Allow Fragments to call for Media Player whenever
-    public fun getMediaPlayer(fragment:Fragment){
-        if(fragment is LibraryListFragment){
-            val libraryFragment = fragment
-            if(mediaPlayer != null) {
-                libraryFragment.setMediaPlayer(mediaPlayer as CustomPlayer);
-            }
-        }else if(fragment is PlaylistListFragment){
-            val playlistFragment = fragment
-            if(mediaPlayer!=null){
-                playlistFragment.setMediaPlayer(mediaPlayer as CustomPlayer)
-            }
-        }
-
-
     }
 
     @TargetApi(23)
