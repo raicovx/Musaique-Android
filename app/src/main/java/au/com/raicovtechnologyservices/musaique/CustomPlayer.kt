@@ -66,18 +66,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
 
         findAllSongs()
-        this.setOnPreparedListener { mp ->
-            mp.start()
-            createNotificationControls(currentPlaylist!![currentPos].trackTitle+" - "+ currentPlaylist!![currentPos].artistName, currentPlaylist!![currentPos].albumTitle)
-            updateFragmentUI(currentFragment.activity)
-        }
 
-        this.setOnCompletionListener { mp -> mp.reset() }
-        this.setOnErrorListener { mp, what, extra ->
-
-            mp.reset()
-            false
-        }
     }
 
     fun playSong(song:Song, songs:ArrayList<Song>, position: Int): Boolean {
@@ -87,10 +76,22 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             }
             this.reset()
             this.setDataSource(song.songPath)
-            this.prepare()
+            this.prepareAsync()
             this.currentPlaylist = songs
             this.currentPos = position
 
+            this.setOnPreparedListener { mp ->
+                mp.start()
+                createNotificationControls(currentPlaylist!![currentPos].trackTitle+" - "+ currentPlaylist!![currentPos].artistName, currentPlaylist!![currentPos].albumTitle)
+                updateFragmentUI(currentFragment.activity)
+            }
+
+            this.setOnCompletionListener { mp -> mp.reset() }
+            this.setOnErrorListener { mp, what, extra ->
+
+                mp.reset()
+                false
+            }
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -105,13 +106,25 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     }
 
     public fun prevSong(){
-        when{
-            currentPos == 0 -> { playSong(currentPlaylist!![currentPlaylist!!.size-1], currentPlaylist!!, currentPlaylist!!.size-1)}
-            else -> playSong(currentPlaylist!![currentPos - 1], currentPlaylist!!, currentPosition-1)
-
+        this.stop()
+        this.reset()
+        when(currentPos) {
+            0 -> {
+                this.setDataSource(this.currentPlaylist!![(this.currentPlaylist!!.size) - 1].songPath)
+                this.currentPos = this.currentPlaylist!!.size - 1
+            }
+            else -> {
+                this.setDataSource(this.currentPlaylist!![this.currentPos - 1].songPath)
+                this.currentPos = this.currentPos - 1
+            }
         }
 
+        this.prepareAsync()
+
+
     }
+
+
 
     public fun updateFragmentUI(activity: Activity) {
 
@@ -196,7 +209,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
                 .setContentIntent(pendingIntent)
                 .setChannelId(channelId)
                 .setStyle(Notification.MediaStyle().setMediaSession(mMediaSession.sessionToken).setShowActionsInCompactView(0))
-                .addAction(R.drawable.ic_skip_previous, "Previous", prevPendingIntent)
+                .addAction(R.drawable.ic_skip_previous, "Previous", prevPendingIntent) //TODO replace with AddAction(Action)
 
 
 

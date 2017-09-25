@@ -48,22 +48,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //Intent Filter
-        var filter: IntentFilter = IntentFilter()
-        filter.addAction(KEY_PREV)
+        //BroadcastReceiver
+        var filter: IntentFilter = IntentFilter();
+        filter.addAction(KEY_PREV);
+        // Add other actions as needed
 
-        class receiver: BroadcastReceiver(){
+        val receiver = object: BroadcastReceiver(){
             override fun onReceive(p0: Context?, p1: Intent?) {
-                when{
-                    intent.action == KEY_PREV -> mediaPlayer!!.prevSong()
+                when(p1!!.action){
+                    KEY_PREV -> mediaPlayer!!.prevSong()
                 }
             }
 
-
         }
 
+        registerReceiver(receiver, filter)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             createPermissions()
         }
 
