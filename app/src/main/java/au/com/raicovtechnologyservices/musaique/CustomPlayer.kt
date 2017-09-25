@@ -85,6 +85,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
     }
 
+    //Playback functions
     fun playSong(song:Song, songs:ArrayList<Song>, position: Int): Boolean {
         try {
             if(this.isPlaying) {
@@ -92,6 +93,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             }
             this.reset()
             this.setDataSource(song.songPath)
+            this.setWakeMode(mContext, android.os.PowerManager.PARTIAL_WAKE_LOCK)
             this.prepareAsync()
             this.currentPlaylist = songs
             this.currentPos = position
@@ -120,6 +122,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
         return true
     }
+
     fun resumeSong(){
         this.start()
         createNotificationControls()
@@ -131,7 +134,6 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     }
 
     fun prevSong(){
-        this.stop()
         this.reset()
         when(currentPos) {
             0 -> {
@@ -149,7 +151,6 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
     }
     fun nextSong(){
-        this.stop()
         this.reset()
         when(currentPos) {
             (this.currentPlaylist!!.size - 1) -> {
@@ -167,7 +168,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
 
     }
 
-
+    //UI functions
 
     public fun updateFragmentUI(activity: Activity) {
 
@@ -192,6 +193,8 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
             Thread(this).start()
 
     }
+
+
 
     public fun getAllSongs(): ArrayList<Song>?{
         return allSongsList;
@@ -294,7 +297,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
         }
     }
 
-    public fun setCurrentFragmentProgressBar(now_playing_music_progress: ProgressBar?) {
+    fun setCurrentFragmentProgressBar(now_playing_music_progress: ProgressBar?) {
         this.currentFragmentProgressBar = now_playing_music_progress
     }
 }

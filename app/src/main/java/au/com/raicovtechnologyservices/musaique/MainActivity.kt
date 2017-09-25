@@ -197,7 +197,7 @@ class MainActivity : AppCompatActivity() {
 
     @TargetApi(23)
     private fun createPermissions() {
-        val permission = Manifest.permission.READ_EXTERNAL_STORAGE
+        val permission = Manifest.permission.READ_EXTERNAL_STORAGE + Manifest.permission.WAKE_LOCK
         if (ContextCompat.checkSelfPermission(applicationContext, permission) != PackageManager.PERMISSION_GRANTED) {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
                 requestPermissions(arrayOf(permission), EXTERNAL_STORAGE_REQUEST_CODE)
