@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="72sp"
+    android:background="@color/colorPrimary"
+    >
+
+    <ImageView
+        android:id="@+id/notification_album_art"
+        android:layout_width="64sp"
+        android:layout_height="64sp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="4dp" />
+
+    <LinearLayout
+        android:id="@+id/notification_song_details"
+        android:layout_width="160sp"
+        android:layout_height="72dp"
+        android:layout_toEndOf="@id/notification_album_art"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingLeft ="4dp">
+
+        <TextView
+            android:id="@+id/notification_song_title"
+            android:layout_width="match_parent"
+            android:layout_height="18sp"
+            android:layout_marginBottom="3sp"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/notification_artist_name"
+            android:layout_width="match_parent"
+            android:layout_height="18sp"
+            android:layout_marginBottom="3sp"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/notification_album_title"
+            android:layout_width="match_parent"
+            android:layout_height="18sp"
+            android:layout_marginBottom="3sp"
+            android:textAlignment="viewStart"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72sp"
+        android:orientation="horizontal"
+        android:layout_toEndOf="@id/notification_song_details"
+        android:paddingStart = "4sp"
+        android:paddingEnd="4sp">
+
+        <Button
+            android:id="@+id/notification_prev_button"
+            android:layout_width="48dp"
+            android:layout_height="72sp"
+            android:layout_gravity="center_vertical"
+            android:drawableStart="@drawable/ic_skip_previous"
+            android:drawableTint="#ffffff"
+            android:padding="6sp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button
+            android:id="@+id/notification_pause_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="48sp"
+            android:layout_height="72sp"
+            android:layout_gravity="center_vertical"
+            android:drawableStart="@drawable/ic_pause"
+            android:drawableTint="#FFFFFF"
+            android:padding="6sp"
+            android:textColor="#FFF" />
+
+        <Button
+            android:id="@+id/notification_play_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="48sp"
+            android:layout_height="72sp"
+            android:layout_gravity="center_vertical"
+            android:drawableStart="@drawable/ic_play_arrow"
+            android:drawableTint="#FFFFFF"
+            android:padding="6sp"
+            android:textColor="#FFF" />
+
+        <Button
+            android:id="@+id/notification_next_button"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="48sp"
+            android:layout_height="72sp"
+            android:layout_gravity="center_vertical"
+            android:drawableStart="@drawable/ic_skip_next"
+            android:drawableTint="#ffffff"
+            android:padding="12sp" />
+    </LinearLayout>
+</RelativeLayout>

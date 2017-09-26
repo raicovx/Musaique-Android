@@ -6,6 +6,8 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.graphics.Color
 import android.media.MediaPlayer
 import android.media.session.MediaSessionManager
 import android.opengl.Visibility
@@ -18,10 +20,9 @@ import android.support.v4.app.NotificationBuilderWithBuilderAccessor
 import android.support.v4.app.NotificationCompat
 import android.support.v4.content.ContextCompat
 import android.media.session.MediaSession
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.support.annotation.DrawableRes
+import android.view.View
+import android.widget.*
 
 import java.io.IOException
 
@@ -51,6 +52,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     val pendingIntent: PendingIntent
         get() {
             val openMainIntent = Intent(this.mContext, MainActivity::class.java)
+            openMainIntent.putExtra("mediaPlayer", ArrayList<CustomPlayer>().add(this))
             val stackBuilder = TaskStackBuilder.create(mContext)
             stackBuilder.addParentStack(MainActivity::class.java)
             stackBuilder.addNextIntent(openMainIntent)
@@ -243,23 +245,50 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
     }
 
 
-
-
     @RequiresApi(Build.VERSION_CODES.O)
     fun createNotificationControls() {
         val channelId: String = "musaique_channel"
-        val mBuilder: Notification.Builder = Notification.Builder(this.mContext)
+        var remoteViews:RemoteViews = RemoteViews("au.com.raicovtechnologyservices.musaique", R.layout.music_notification_controls)
+        //Text
+        remoteViews.setTextViewText(R.id.notification_song_title, currentPlaylist!![currentPos].trackTitle)
+        remoteViews.setTextViewText(R.id.notification_artist_name, currentPlaylist!![currentPos].artistName)
+        remoteViews.setTextViewText(R.id.notification_album_title, currentPlaylist!![currentPos].albumTitle)
+        remoteViews.setImageViewBitmap(R.id.notification_album_art, currentPlaylist!![currentPos].albumArt)
+        //Buttons
+
+        when(this.isPlaying){
+            true -> {
+                remoteViews.setOnClickPendingIntent(R.id.notification_prev_button, prevPendingIntent)
+                remoteViews.setViewVisibility(R.id.notification_play_button, View.GONE)
+                remoteViews.setViewVisibility(R.id.notification_pause_button, View.VISIBLE)
+                remoteViews.setOnClickPendingIntent(R.id.notification_pause_button, pausePendingIntent)
+                remoteViews.setOnClickPendingIntent(R.id.notification_next_button, nextPendingIntent)
+            }
+
+            else ->{
+                remoteViews.setOnClickPendingIntent(R.id.notification_prev_button, prevPendingIntent)
+                remoteViews.setViewVisibility(R.id.notification_pause_button, View.GONE)
+                remoteViews.setViewVisibility(R.id.notification_play_button, View.VISIBLE)
+                remoteViews.setOnClickPendingIntent(R.id.notification_play_button, playPendingIntent)
+                remoteViews.setOnClickPendingIntent(R.id.notification_next_button, nextPendingIntent)
+            }
+
+        }
+
+        val mBuilder: Notification.Builder = Notification.Builder(this.mContext, channelId)
                 .setSmallIcon(R.drawable.ic_headphone)
-                .setContentTitle(currentPlaylist!![currentPos].trackTitle+" - "+ currentPlaylist!![currentPos].artistName)
-                .setContentText(currentPlaylist!![currentPos].albumTitle)
+                .setColorized(true)
+                .setColor(Color.argb(255,57,62,70))
                 .setOngoing(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
                 .setChannelId(channelId)
-                .setStyle(Notification.MediaStyle().setMediaSession(mMediaSession.sessionToken).setShowActionsInCompactView(0, 1, 2))
+                        //.setShowActionsInCompactView(0, 1, 2))
+                .setCustomContentView(remoteViews)
 
-                //TODO replace these with AddAction(Action)
-        when(this.isPlaying) {
+
+        //TODO replace these with AddAction(Action)
+       /* when(this.isPlaying) {
             true -> {
                 mBuilder.addAction(R.drawable.ic_skip_previous, "Previous", prevPendingIntent)
                 mBuilder.addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)
@@ -271,12 +300,11 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
                 mBuilder.addAction(R.drawable.ic_skip_next, "Next", nextPendingIntent)
             }
 
-        }
+        }*/
 
 
         val mNotificationManager: NotificationManager = mContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         var notification: Notification = mBuilder.build()
-
 
         notification.flags = Notification.FLAG_NO_CLEAR
         mNotificationManager.notify(1, notification)

@@ -108,8 +108,16 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
-        mediaPlayer = CustomPlayer(this)
 
+        //Init Media Player
+        var callingIntent: Intent = getIntent()
+
+        if(callingIntent.getBundleExtra("mediaPlayer") != null){
+            var customPlayer: CustomPlayer = callingIntent.getBundleExtra("mediaPlayer") as CustomPlayer
+            this.mediaPlayer = customPlayer;
+        }else{
+            this.mediaPlayer = CustomPlayer(this)
+        }
 
 
 
@@ -135,7 +143,11 @@ class MainActivity : AppCompatActivity() {
         //Menu & ToolBar Actions
         val fab: FloatingActionButton = findViewById(R.id.np_play_pause)
         navigationList!!.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id -> selectItem(position) }
-        title = menuItems!![navigationList!!.selectedItemPosition]
+        if(navigationList!!.selectedItemPosition != -1) {
+            title = menuItems!![navigationList!!.selectedItemPosition]
+        }else{
+            title = menuItems!![0]
+        }
 
 
         val toolbar = findViewById<Toolbar>(R.id.tool_bar)
@@ -171,6 +183,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
 
     @TargetApi(26)
     private fun createNotificationChannel() {
