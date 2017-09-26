@@ -106,7 +106,7 @@ class CustomPlayer(var mContext: Context) : android.media.MediaPlayer(), Runnabl
                 updateFragmentUI(currentFragment.activity)
             }
 
-            this.setOnCompletionListener { mp -> mp.reset() }
+            this.setOnCompletionListener { mp -> nextSong() }
             this.setOnErrorListener { mp, what, extra ->
 
                 mp.reset()
