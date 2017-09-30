@@ -32,6 +32,7 @@ class Song(private val id: Long, val trackTitle: String, val artistName: String,
 
                 if (pfd != null) {
                     val fd = pfd.fileDescriptor
+
                     bm = BitmapFactory.decodeFileDescriptor(fd)
                 }
             } catch (e: Exception) {
