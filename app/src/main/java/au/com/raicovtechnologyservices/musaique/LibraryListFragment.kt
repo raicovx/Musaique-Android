@@ -3,8 +3,7 @@ package au.com.raicovtechnologyservices.musaique
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.content.ContextCompat
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v7.widget.CardView
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -14,10 +13,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.Transformation
-import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.TextView
-import org.w3c.dom.TypeInfo
 
 import java.io.File
 import kotlin.collections.ArrayList
@@ -26,9 +22,9 @@ import kotlin.collections.ArrayList
  * Created by Jamie on 10/04/2017.
  */
 
-class LibraryListFragment : Fragment(), RecyclerViewClickListener {
+class LibraryListFragment() : Fragment(), RecyclerViewClickListener {
 
-    private var songs: ArrayList<Song>? = null
+    private var songs: ArrayList<MediaBrowserCompat.MediaItem>? = null
     private var mLibraryList: RecyclerView? = null
     private var mLibraryLayoutManager: RecyclerView.LayoutManager? = null
     private val EXTERNAL_STORAGE_REQUEST_CODE = 433
@@ -47,7 +43,7 @@ class LibraryListFragment : Fragment(), RecyclerViewClickListener {
     private var targetHeight: Int = 0
     private var fabIsVisible = false
 
-    var mMediaPlayer: CustomPlayer? = null
+    var mCustomPlayer: CustomPlayer? = null
     private val musicDirectory: File? = null
 
     //Animations
@@ -58,8 +54,9 @@ class LibraryListFragment : Fragment(), RecyclerViewClickListener {
 
         val rootView = inflater!!.inflate(R.layout.library_list_fragment, container, false)
 
-        //declare song array
-        songs = mMediaPlayer!!.allSongsList
+        var tempCustomPlayer = CustomPlayer(context)
+
+        songs = tempCustomPlayer.getAllSongs()
 
 
         //Declare - Media Controls
@@ -78,18 +75,20 @@ class LibraryListFragment : Fragment(), RecyclerViewClickListener {
         mLibraryLayoutManager = LinearLayoutManager(activity)
         mLibraryList!!.layoutManager = mLibraryLayoutManager
 
-        //Set Library list adapter
-        mLibraryList!!.adapter = LibraryListAdapter(songs as ArrayList<Song>, this)
 
         //populate list
-
+        //Set Library list adapter
+        mLibraryList!!.adapter = LibraryListAdapter(songs as ArrayList<MediaBrowserCompat.MediaItem>, this)
         return rootView
 
     }
     //Media Player Transport for Fragments
     public fun setMediaPlayer(mediaPlayer:CustomPlayer){
-        mMediaPlayer = mediaPlayer
-        mMediaPlayer!!.currentFragment = this as Fragment
+        mCustomPlayer = mediaPlayer
+        mCustomPlayer!!.currentFragment = this as Fragment
+
+
+
     }
 
 
@@ -137,9 +136,9 @@ class LibraryListFragment : Fragment(), RecyclerViewClickListener {
         }
 
 
-        mMediaPlayer!!.playSong(selectedSong, songs as ArrayList<Song>, position)
+        mCustomPlayer!!.playSong(selectedSong, songs as ArrayList<MediaBrowserCompat.MediaItem>, position)
 
-        mMediaPlayer?.let{ mediaPlayer -> mediaPlayer.setCurrentFragmentProgressBar(activity.findViewById(R.id.now_playing_music_progress))}
+        mCustomPlayer?.let{ mediaPlayer -> mediaPlayer.setCurrentFragmentProgressBar(activity.findViewById(R.id.now_playing_music_progress))}
 
     }
 

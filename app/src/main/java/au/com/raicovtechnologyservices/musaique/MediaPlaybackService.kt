@@ -1,10 +1,14 @@
 package au.com.raicovtechnologyservices.musaique
 
 import android.content.ContentUris
+import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.browse.MediaBrowser
 import android.net.Uri
+import android.os.Binder
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserServiceCompat
@@ -21,6 +25,9 @@ class MediaPlaybackService: MediaBrowserServiceCompat() {
 
     private lateinit var mMediaSession: MediaSessionCompat
     private lateinit var mStateBuilder: PlaybackStateCompat.Builder
+    lateinit var mCustomPlayer: CustomPlayer
+
+    private var mBinder: LocalBinder = LocalBinder()
 
     //Lists
     private var allSongsList: ArrayList<MediaBrowserCompat.MediaItem>? = ArrayList<MediaBrowserCompat.MediaItem>()
@@ -29,7 +36,7 @@ class MediaPlaybackService: MediaBrowserServiceCompat() {
 
     override fun onCreate() {
         super.onCreate()
-
+        findAllSongs()
         mMediaSession = MediaSessionCompat(applicationContext, "MusaiquePlaybackService")
 
         //Enable callbacks from media buttons and transport controls
@@ -46,9 +53,25 @@ class MediaPlaybackService: MediaBrowserServiceCompat() {
         //Set token to allow client activities to communicate with it
         sessionToken = mMediaSession.sessionToken
 
+        mCustomPlayer = CustomPlayer(this)
+        mCustomPlayer.allSongsList = this.allSongsList
+
     }
 
+    inner class LocalBinder(): Binder(){
+        fun getService():MediaPlaybackService{
+            return this@MediaPlaybackService
+        }
+    }
 
+    override fun onBind(intent: Intent?): IBinder {
+
+        if(intent!!.action == "music_service"){
+            return mBinder
+        }else {
+            return super.onBind(intent)
+        }
+    }
 
     override fun onLoadChildren(parentId: String, result: Result<MutableList<MediaBrowserCompat.MediaItem>>) {
        result.sendResult(null)
@@ -78,24 +101,45 @@ class MediaPlaybackService: MediaBrowserServiceCompat() {
 
             //add songs to list
             do {
-                val id = musicCursor.getLong(idColumn)
+                val id:Long = musicCursor.getLong(idColumn)
                 val title = musicCursor.getString(titleColumn)
                 val artist = musicCursor.getString(artistColumn)
                 val album = musicCursor.getString(albumColumn)
                 val albumId = musicCursor.getLong(albumArtColumn)
                 val songPath = musicCursor.getString(songPathColumn)
                 var artUri: Uri? = null
+                var albumArtBm: Bitmap? = null
+
+
                 try {
                     val sArtworkUri = Uri
                             .parse("content://media/external/audio/albumart")
 
                     artUri = ContentUris.withAppendedId(sArtworkUri, albumId)
 
+                    val pfd = this.contentResolver
+                            .openFileDescriptor(artUri, "r")
 
+                    if (pfd != null) {
+                        val fd = pfd.fileDescriptor
+
+                        albumArtBm = BitmapFactory.decodeFileDescriptor(fd)
+                    }
                 } catch (e: Exception) {
                 }
+
+                var extras: Bundle = Bundle()
+                        extras.putString("artist", artist)
+                        extras.putString("album", album)
                 var songFile = File(songPath)
-                var mMediaDescription = MediaDescriptionCompat(allSongsList!!.size as String, title, artist, album, null, artUri, null, Uri.fromFile(songFile))
+                var mMediaDescription = MediaDescriptionCompat.Builder()
+                        .setTitle(title)
+                        .setMediaUri(Uri.fromFile(songFile))
+                        .setIconUri(artUri)
+                        .setMediaId(allSongsList!!.size.toString())
+                        .setIconBitmap(albumArtBm)
+                        .setExtras(extras)
+                        .build()
                 var mMediaItem = MediaBrowserCompat.MediaItem(mMediaDescription, MediaBrowser.MediaItem.FLAG_PLAYABLE)
                 allSongsList!!.add(mMediaItem)
 
@@ -106,7 +150,7 @@ class MediaPlaybackService: MediaBrowserServiceCompat() {
             } while (musicCursor.moveToNext())
 
             for(artist: Artist in artistList as ArrayList<Artist>){
-                artist.getArtistSongsAndAlbums(allSongsList as ArrayList<Song>)
+                artist.getArtistSongsAndAlbums(allSongsList as ArrayList<MediaBrowserCompat.MediaItem>)
             }
         }else{
             //TODO: Display feedback to inform the user no music could be found.

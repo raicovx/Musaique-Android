@@ -6,10 +6,7 @@ import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Color
@@ -23,9 +20,11 @@ import android.support.v7.app.ActionBar
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.IBinder
 import android.provider.MediaStore
 import android.support.design.widget.FloatingActionButton
 import android.support.v4.app.BundleCompat
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v7.widget.Toolbar
 import android.view.Gravity
 import android.view.View
@@ -43,11 +42,18 @@ class MainActivity : AppCompatActivity() {
     private var mDrawerToggle: ActionBarDrawerToggle? = null
     private var mediaPlayer: CustomPlayer? = null
 
+
+    lateinit var libraryListFragment: LibraryListFragment
     //Broadcast Decs
     val KEY_PREV: String = "prevSong"
     val KEY_PLAY: String = "resumeSong"
     val KEY_PAUSE: String = "pauseSong"
     val KEY_NEXT: String = "nextSong"
+
+    private lateinit var mService: MediaPlaybackService
+    lateinit var mConnection: ServiceConnection
+
+    private var mBound: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,17 +70,17 @@ class MainActivity : AppCompatActivity() {
         val receiver = object: BroadcastReceiver(){
             override fun onReceive(p0: Context?, p1: Intent?) {
                 when(p1!!.action){
-                    KEY_PREV -> mediaPlayer!!.prevSong()
+                    KEY_PREV -> mService.mCustomPlayer!!.prevSong()
                     KEY_PLAY -> {
-                        mediaPlayer!!.resumeSong()
+                        mService.mCustomPlayer!!.resumeSong()
 
                     }
                     KEY_PAUSE ->{
-                        mediaPlayer!!.pauseSong()
+                        mService.mCustomPlayer!!.pauseSong()
                     }
 
                     KEY_NEXT -> {
-                        mediaPlayer!!.nextSong()
+                        mService.mCustomPlayer!!.nextSong()
                     }
                 }
             }
@@ -84,9 +90,37 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(receiver, filter)
 
+        mConnection = object: ServiceConnection {
+
+            override fun onServiceConnected(className: ComponentName,
+                                            service: IBinder) {
+
+                var binder: MediaPlaybackService.LocalBinder = service as MediaPlaybackService.LocalBinder
+
+                mService = binder.getService()
+                mBound = true
+                libraryListFragment.setMediaPlayer(mService.mCustomPlayer)
 
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            }
+
+            override fun onServiceDisconnected(arg0: ComponentName) {
+                mBound = false
+            }
+        }
+        //Create Instance of Fragments
+        libraryListFragment = LibraryListFragment()
+        if(savedInstanceState == null) {
+            supportFragmentManager
+                    .beginTransaction()
+                    .add(R.id.content_fragment, libraryListFragment, "Library")
+                    .commit()
+
+        }
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             createPermissions()
         }
 
@@ -121,19 +155,15 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        //Create Instance of Fragments
-        val libraryListFragment = LibraryListFragment()
+
 
 
         //Load initial Fragment
         if (savedInstanceState == null) {
 
-            supportFragmentManager
-                    .beginTransaction()
-                    .add(R.id.content_fragment, libraryListFragment, "Library")
-                    .commit()
 
-                libraryListFragment.setMediaPlayer(mediaPlayer as CustomPlayer)
+
+
 
         }
 
@@ -171,15 +201,13 @@ class MainActivity : AppCompatActivity() {
 
         //FAB click to play/pause music
         fab.setOnClickListener {
-            if (mediaPlayer != null) {
-                if (mediaPlayer!!.isPlaying) {
-                    mediaPlayer!!.pause()
+                if (mService.mCustomPlayer!!.isPlaying) {
+                    mService.mCustomPlayer!!.pause()
                     fab.setImageResource(R.drawable.ic_play_arrow_white_48dp)
                 } else {
-                    mediaPlayer!!.start()
+                    mService.mCustomPlayer!!.start()
                     fab.setImageResource(R.drawable.ic_pause_white_48dp)
                 }
-            }
         }
 
     }
@@ -229,18 +257,18 @@ class MainActivity : AppCompatActivity() {
             }
             1 -> {
                 fragment = PlaylistListFragment()
-                fragment.setMediaPlayer(mediaPlayer as CustomPlayer)
+                fragment.setMediaPlayer(mService.mCustomPlayer)
                 tag = "Playlists"
             }
             2 -> {
                 fragment = ArtistGridFragment()
-                fragment.setMediaPlayer(mediaPlayer as CustomPlayer)
+                fragment.setMediaPlayer(mService.mCustomPlayer)
                 tag = "Artists"
             }
 
             else -> {
                 fragment = LibraryListFragment()
-                fragment.setMediaPlayer(mediaPlayer as CustomPlayer)
+                fragment.setMediaPlayer(mService.mCustomPlayer)
                 tag = "Library"
             }
         }
@@ -264,6 +292,14 @@ class MainActivity : AppCompatActivity() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         mDrawerToggle!!.onConfigurationChanged(newConfig)
+    }
+    override fun onStart(){
+        super.onStart()
+        //init service
+        var mediaPlaybackServiceIntent:Intent = Intent(this, MediaPlaybackService::class.java)
+        mediaPlaybackServiceIntent.action = "music_service"
+        bindService(mediaPlaybackServiceIntent, mConnection, Context.BIND_AUTO_CREATE)
+
     }
 
     override fun onDestroy() {

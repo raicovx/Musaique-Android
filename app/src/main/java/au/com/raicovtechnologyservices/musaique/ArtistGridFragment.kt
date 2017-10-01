@@ -20,10 +20,11 @@ class ArtistGridFragment : Fragment(){
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater!!.inflate(R.layout.artist_grid_fragment, container, false)
-
+        var tempMediaPlayer = CustomPlayer(context)
+        tempMediaPlayer.getAllSongs()
         artistsGrid = rootView.findViewById(R.id.artist_grid_view)
 
-        artistsGrid!!.adapter = ArtistGridImageAdapter(mMediaPlayer!!.mContext, mMediaPlayer!!.artistList as ArrayList<Artist>)
+        artistsGrid!!.adapter = ArtistGridImageAdapter(mMediaPlayer!!.mContext, tempMediaPlayer!!.artistList as ArrayList<Artist>)
 
         return rootView
     }

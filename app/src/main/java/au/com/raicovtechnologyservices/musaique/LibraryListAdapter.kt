@@ -1,5 +1,6 @@
 package au.com.raicovtechnologyservices.musaique
 
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +12,7 @@ import android.widget.TextView
 import java.util.ArrayList
 
 
-class LibraryListAdapter(private val songData: ArrayList<Song>, listener: RecyclerViewClickListener) : RecyclerView.Adapter<LibraryListAdapter.ViewHolder>() {
+class LibraryListAdapter(private val songData: ArrayList<MediaBrowserCompat.MediaItem>, listener: RecyclerViewClickListener) : RecyclerView.Adapter<LibraryListAdapter.ViewHolder>() {
 
     var listener: RecyclerViewClickListener
 
@@ -49,10 +50,10 @@ class LibraryListAdapter(private val songData: ArrayList<Song>, listener: Recycl
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.mSongTitle.text = songData[position].trackTitle
-        holder.mAlbumTitle.text = songData[position].albumTitle
-        holder.mArtistName.text = songData[position].artistName
-        holder.mAlbumArt.setImageBitmap(songData[position].albumArt)
+        holder.mSongTitle.text = songData[position].description.title
+        holder.mAlbumTitle.text = songData[position].description.extras!!.getString("album")
+        holder.mArtistName.text = songData[position].description.extras!!.getString("artist")
+        holder.mAlbumArt.setImageBitmap(songData[position].description.iconBitmap)
     }
 
     override fun getItemCount(): Int {
